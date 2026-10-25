@@ -68,13 +68,26 @@ a{color:inherit}
 .screen:-webkit-full-screen{background:#000;align-items:center}
 .screen:-webkit-full-screen .stage{width:min(100vw,100vh * 9 / 16);border-radius:0;border:0;box-shadow:none}
 
-/* recording mode (?record): bare 9:16 frame for screen capture */
-.rec body{background:#000}
-.rec .app{display:block;padding:0;min-height:0}
-.rec .player{gap:0}
+/* recording mode: bare 9:16 frame for the phone's / OS screen recorder */
+.rec,.rec body{overflow:hidden;background:#000}
 .rec .controls,.rec .hint,.rec .side,.rec .pause-ov{display:none}
-.rec .screen{height:100vh;align-items:center;background:#000}
-.rec .stage{width:min(100vw,100vh * 9 / 16);border-radius:0;border:0;box-shadow:none;cursor:none}
+.rec .screen{position:fixed;inset:0;z-index:50;height:100vh;height:100dvh;align-items:center;justify-content:center;background:#000}
+.rec .stage{width:min(100vw,100vh * 9 / 16);width:min(100vw,100dvh * 9 / 16);border-radius:0;border:0;box-shadow:none;cursor:none}
+.rec-ui{position:absolute;inset:0;z-index:70;display:grid;place-items:center;padding:20px;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.rec-card{width:100%;max-width:380px;padding:24px 22px;border-radius:22px;background:var(--panel);border:1px solid var(--line-2);box-shadow:0 30px 60px -20px rgba(0,0,0,.8)}
+.rec-k{margin:0 0 8px;display:flex;align-items:center;gap:8px;font:600 11.5px var(--f-mono);letter-spacing:.18em;text-transform:uppercase;color:#ff5a4a}
+.rec-k::before{content:"";width:9px;height:9px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
+.rec-card h2{margin:0;font:700 23px/1.15 var(--f-display);letter-spacing:.01em}
+.rec-card ol{margin:16px 0 20px;padding-left:20px;display:grid;gap:10px;font-size:14.5px;line-height:1.5;color:var(--fg-2)}
+.rec-card ol li::marker{font:600 13px var(--f-mono);color:var(--gold)}
+.rec-actions{display:flex;gap:10px}
+.rec-actions button{flex:1;min-height:48px;border-radius:99px;font:700 15px var(--f-body);cursor:pointer;border:1px solid var(--line-2);background:var(--panel-2)}
+.rec-actions .rec-go{background:var(--gold);border-color:var(--gold);color:var(--ink)}
+.rec-count{font:800 min(40vw,160px)/1 var(--f-display);color:var(--gold);animation:pop .9s var(--ease-out) both}
+@keyframes pop{from{opacity:0;transform:scale(1.6)}40%{opacity:1;transform:scale(1)}to{opacity:.85}}
+.rec-exit{position:absolute;right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom));z-index:65;min-height:44px;padding:0 18px;border-radius:99px;border:1px solid rgba(255,255,255,.2);background:rgba(17,22,30,.85);font:600 13px var(--f-mono);letter-spacing:.06em;cursor:pointer;transition:opacity .4s}
+.rec-exit.hide{opacity:0;pointer-events:none}
+.rec-btn svg circle:last-child{fill:#ff5a4a}
 
 /* ---------- World SVG ---------- */
 svg.world{position:absolute;inset:0;width:100%;height:100%;display:block}
@@ -604,6 +617,16 @@ details.sources a:hover{color:var(--gold)}
         <div class="copy in" id="copy"></div>
         <div class="pause-ov" aria-hidden="true"><span><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z"/></svg></span></div>
       </div>
+      <div class="rec-ui" id="recUi" hidden>
+        <div class="rec-card" id="recIntro" role="dialog" aria-modal="true" aria-labelledby="recTitle">
+          <p class="rec-k">Modo grabación</p>
+          <h2 id="recTitle">Graba el anuncio con tu celular</h2>
+          <ol><li>Activa la grabación de pantalla de tu celular: en iPhone desde el Centro de control, en Android desde los ajustes rápidos.</li><li>Vuelve aquí y toca «Empezar». Verás una cuenta regresiva de 3 segundos.</li><li>La animación se reproduce completa una sola vez y se detiene al final. Luego recorta el inicio y el final en tu galería.</li></ol>
+          <div class="rec-actions"><button class="rec-go" id="recGo" type="button">Empezar</button><button id="recCancel" type="button">Cancelar</button></div>
+        </div>
+        <div class="rec-count" id="recCount" aria-live="assertive" hidden></div>
+      </div>
+      <button class="rec-exit" id="recExit" type="button" hidden></button>
     </div>
 
     <div class="controls">
@@ -612,6 +635,7 @@ details.sources a:hover{color:var(--gold)}
       <button class="btn primary" id="play" type="button" aria-label="Pausar" title="Pausar"><svg viewBox="0 0 24 24" id="playIcon"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg></button>
       <button class="btn" id="next" type="button" aria-label="Escena siguiente" title="Escena siguiente"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
       <button class="btn" id="fs" type="button" aria-label="Pantalla completa" title="Pantalla completa"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <button class="btn rec-btn" id="recBtn" type="button" aria-label="Modo grabación" title="Modo grabación"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4" stroke="none"/></svg></button>
     </div>
     <p class="hint">
       <span class="keys"><kbd>←</kbd> <kbd>→</kbd> navegar · <kbd>Espacio</kbd> pausa · <kbd>F</kbd> pantalla completa</span>
@@ -628,7 +652,7 @@ details.sources a:hover{color:var(--gold)}
     <p class="lead">El scooter eléctrico para la ciudad, en once escenas: motor, batería, suspensión, llantas, frenos, luces, conectividad, velocidad y lo que dice la prensa.</p>
     <ol class="chapters" id="chapters"></ol>
     <div class="tools">
-      <a class="chip" href="?record"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="#e3a83f" stroke="none"/></svg>Modo grabación 9:16</a>
+      <button class="chip" id="recChip" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="#e3a83f" stroke="none"/></svg>Modo grabación 9:16</button>
     </div>
     <details class="sources">
       <summary>Fuentes</summary>
@@ -649,7 +673,7 @@ details.sources a:hover{color:var(--gold)}
 
 <script>
 (()=>{
-const DATA={"locale": "es-CO", "ui": {"scene": "Escena", "pause": "Pausar", "play": "Reproducir"}, "scenes": [{"id": "intro", "cam": {"f": [300, 205], "z": 1.15}, "d": 5600, "screen": "25", "nav": "Presentación", "v": "ST3 Pro", "eyebrow": "Presentamos", "stat": "ST3 PRO", "label": "Navee · Movilidad urbana", "cap": "Potencia de sobra, suspensión de cuatro brazos y tecnología inteligente para moverte por la ciudad."}, {"id": "motor", "cam": {"f": [130, 312], "z": 2.3}, "screen": "25", "callouts": [{"p": [146, 300], "dx": 60, "dy": -190, "len": 170, "t": "Motor trasero", "s": "600 W nominales"}], "nav": "Motor", "v": "1.350 W", "eyebrow": "01 — Motor", "num": 1350, "unit": "W", "label": "Potencia pico", "specs": [["600 W", "Nominal"], ["28 %", "Pendiente máx."], ["Trasero", "Tracción"]], "cap": "En pruebas independientes subió una cuesta del 17 % a casi 17 km/h."}, {"id": "battery", "cam": {"f": [300, 270], "z": 1.85}, "screen": "25", "callouts": [{"p": [250, 272], "dx": 40, "dy": -120, "len": 170, "t": "Pack 48 V", "s": "Integrado en el deck"}], "nav": "Batería", "v": "596,7 Wh", "eyebrow": "02 — Batería", "num": 596.7, "dec": 1, "unit": "Wh", "label": "Batería de 48 V", "range": {"a": 53.33, "b": 66.67, "real": "Real 40–50 km", "max": "Máx. 75 km"}, "specs": [["48 V", "Voltaje"], ["18650", "Celdas 13S5P"], ["8–10 h", "Carga completa"]], "cap": "Hasta 75 km declarados a 15 km/h. En pruebas reales, entre 40 y 50 km."}, {"id": "suspension", "cam": {"f": [300, 290], "z": 1.15}, "screen": "22", "callouts": [{"p": [172, 301], "dx": -40, "dy": 190, "len": 150, "t": "Trasera", "s": "2 brazos"}, {"p": [454, 300], "dx": 40, "dy": 190, "len": 150, "t": "Delantera", "s": "2 brazos"}], "nav": "Suspensión", "v": "4 brazos", "eyebrow": "03 — Suspensión", "num": 4, "label": "Brazos Damping Arm", "specs": [["2", "Delanteros"], ["2", "Traseros"], ["Elastómero", "Amortiguación"]], "cap": "Las reseñas la ubican entre las más suaves de su categoría: se traga baches, grietas y andenes."}, {"id": "tires", "cam": {"f": [470, 312], "z": 2.3}, "screen": "25", "callouts": [{"p": [504, 278], "dx": 50, "dy": -90, "len": 160, "t": "10\" Tubeless", "s": "Autosellante"}], "nav": "Llantas", "v": "10\" × 2,5\"", "eyebrow": "04 — Llantas", "stat": "10\"", "label": "Tubeless autosellantes", "specs": [["10\" × 2,5\"", "Medida"], ["Sin cámara", "Tubeless"], ["Gel sellante", "Anti-pinchazos"]], "cap": "Neumáticos anchos que sellan solos los pinchazos pequeños y dan más agarre en el asfalto."}, {"id": "brakes", "cam": {"f": [300, 260], "z": 1.1}, "screen": "0", "halt": 950, "callouts": [{"p": [130, 312], "dx": 30, "dy": 170, "len": 130, "t": "Disco", "s": "Trasero"}, {"p": [470, 312], "dx": -30, "dy": 170, "len": 130, "t": "Tambor", "s": "Delantero"}], "nav": "Frenado", "v": "3 + TCS", "eyebrow": "05 — Frenado", "num": 3, "label": "Sistemas de freno", "specs": [["Tambor", "Delantero"], ["Disco", "Trasero"], ["E-ABS", "3 niveles"]], "cap": "Con control de tracción TCS, que evita que la rueda patine al acelerar o frenar fuerte."}, {"id": "lights", "cam": {"f": [300, 230], "z": 1.05}, "screen": "18", "callouts": [{"p": [440, 198], "dx": -60, "dy": -230, "len": 150, "t": "Faro automático", "s": "Sensor de luz"}, {"p": [300, 291], "dx": -40, "dy": 150, "len": 160, "t": "Luz ambiental RGB", "s": "Personalizable"}, {"p": [66, 299], "dx": 30, "dy": -170, "len": 140, "t": "Luz de freno", "s": "LED"}], "nav": "Iluminación", "v": "RGB", "eyebrow": "06 — Iluminación", "stat": "RGB", "label": "Luz ambiental en el deck", "specs": [["Auto", "Faro con sensor"], ["LED", "Luz de freno"], ["Manubrio", "Direccionales"]], "cap": "El faro se enciende solo al anochecer y el color de las luces del deck se elige desde la app."}, {"id": "smart", "cam": {"f": [405, 110], "z": 1.9, "t": [300, 560]}, "screen": "25", "callouts": [{"p": [396, 70], "dx": -40, "dy": -110, "len": 150, "t": "Pantalla", "s": "Velocidad y modo"}, {"p": [430, 180], "dx": -50, "dy": 110, "len": 150, "t": "IPX5", "s": "Resiste salpicaduras"}], "nav": "Conectividad", "v": "Find My", "eyebrow": "07 — Conectividad", "stat": "App", "label": "+ Apple Find My", "specs": [["Find My", "Localización iOS"], ["Proximidad", "Desbloqueo"], ["Crucero", "Control"]], "cap": "Encuéntralo desde tu iPhone, bloquéalo desde la app y desbloquéalo con solo acercarte."}, {"id": "speed", "cam": {"f": [300, 240], "z": 0.95}, "screen": "speed", "nav": "Velocidad", "v": "40 km/h", "eyebrow": "08 — Rendimiento", "num": 40, "unit": "km/h", "sup": "*", "label": "Velocidad máxima", "specs": [["3 + peatón", "Modos"], ["120 kg", "Carga máx."], ["25,3 kg", "Peso"]], "cap": "Medido en pruebas: 40,4 km/h reales. Respeta siempre el límite de tu ciudad.", "foot": "*Versión internacional. En la Unión Europea se limita a 25 km/h."}, {"id": "press", "cam": {"f": [300, 240], "z": 0.9}, "screen": "25", "d": 8800, "nav": "Prensa", "v": "4 reseñas", "eyebrow": "La prensa opina", "quotes": [["Es como un Rolls-Royce.", "New Atlas"], ["Un scooter sólido con una suspensión seria.", "The Gadgeteer"], ["Potente, divertido, útil.", "Cult of Mac"], ["El mejor scooter urbano de 2025.", "AndroidGuys"]], "fine": "Titulares de reseñas, traducidos del inglés."}, {"id": "outro", "cam": {"f": [300, 300], "z": 0.82}, "screen": "P", "d": 10000, "halt": 0, "nav": "Ficha técnica", "v": "Resumen", "eyebrow": "Navee", "stat": "ST3 PRO", "label": "Hecho para la ciudad", "sheet": [["bolt", "1.350 W", "Potencia pico"], ["pin", "75 km", "Autonomía declarada"], ["battery", "596,7 Wh", "Batería 48 V"], ["spring", "4 brazos", "Suspensión"], ["tire", "10\" × 2,5\"", "Tubeless"], ["slope", "28 %", "Pendiente máx."], ["weight", "25,3 kg", "Peso"], ["drop", "IPX5", "Resistencia al agua"], ["locate", "Find My", "Localización"]], "fine": "Animación de fan, no oficial. Datos de la ficha técnica oficial y reseñas independientes; pueden variar según el mercado."}]};
+const DATA={"locale": "es-CO", "ui": {"scene": "Escena", "pause": "Pausar", "play": "Reproducir", "recExit": "✕ Salir", "recDone": "✓ Listo · toca para salir"}, "scenes": [{"id": "intro", "cam": {"f": [300, 205], "z": 1.15}, "d": 5600, "screen": "25", "nav": "Presentación", "v": "ST3 Pro", "eyebrow": "Presentamos", "stat": "ST3 PRO", "label": "Navee · Movilidad urbana", "cap": "Potencia de sobra, suspensión de cuatro brazos y tecnología inteligente para moverte por la ciudad."}, {"id": "motor", "cam": {"f": [130, 312], "z": 2.3}, "screen": "25", "callouts": [{"p": [146, 300], "dx": 60, "dy": -190, "len": 170, "t": "Motor trasero", "s": "600 W nominales"}], "nav": "Motor", "v": "1.350 W", "eyebrow": "01 — Motor", "num": 1350, "unit": "W", "label": "Potencia pico", "specs": [["600 W", "Nominal"], ["28 %", "Pendiente máx."], ["Trasero", "Tracción"]], "cap": "En pruebas independientes subió una cuesta del 17 % a casi 17 km/h."}, {"id": "battery", "cam": {"f": [300, 270], "z": 1.85}, "screen": "25", "callouts": [{"p": [250, 272], "dx": 40, "dy": -120, "len": 170, "t": "Pack 48 V", "s": "Integrado en el deck"}], "nav": "Batería", "v": "596,7 Wh", "eyebrow": "02 — Batería", "num": 596.7, "dec": 1, "unit": "Wh", "label": "Batería de 48 V", "range": {"a": 53.33, "b": 66.67, "real": "Real 40–50 km", "max": "Máx. 75 km"}, "specs": [["48 V", "Voltaje"], ["18650", "Celdas 13S5P"], ["8–10 h", "Carga completa"]], "cap": "Hasta 75 km declarados a 15 km/h. En pruebas reales, entre 40 y 50 km."}, {"id": "suspension", "cam": {"f": [300, 290], "z": 1.15}, "screen": "22", "callouts": [{"p": [172, 301], "dx": -40, "dy": 190, "len": 150, "t": "Trasera", "s": "2 brazos"}, {"p": [454, 300], "dx": 40, "dy": 190, "len": 150, "t": "Delantera", "s": "2 brazos"}], "nav": "Suspensión", "v": "4 brazos", "eyebrow": "03 — Suspensión", "num": 4, "label": "Brazos Damping Arm", "specs": [["2", "Delanteros"], ["2", "Traseros"], ["Elastómero", "Amortiguación"]], "cap": "Las reseñas la ubican entre las más suaves de su categoría: se traga baches, grietas y andenes."}, {"id": "tires", "cam": {"f": [470, 312], "z": 2.3}, "screen": "25", "callouts": [{"p": [504, 278], "dx": 50, "dy": -90, "len": 160, "t": "10\" Tubeless", "s": "Autosellante"}], "nav": "Llantas", "v": "10\" × 2,5\"", "eyebrow": "04 — Llantas", "stat": "10\"", "label": "Tubeless autosellantes", "specs": [["10\" × 2,5\"", "Medida"], ["Sin cámara", "Tubeless"], ["Gel sellante", "Anti-pinchazos"]], "cap": "Neumáticos anchos que sellan solos los pinchazos pequeños y dan más agarre en el asfalto."}, {"id": "brakes", "cam": {"f": [300, 260], "z": 1.1}, "screen": "0", "halt": 950, "callouts": [{"p": [130, 312], "dx": 30, "dy": 170, "len": 130, "t": "Disco", "s": "Trasero"}, {"p": [470, 312], "dx": -30, "dy": 170, "len": 130, "t": "Tambor", "s": "Delantero"}], "nav": "Frenado", "v": "3 + TCS", "eyebrow": "05 — Frenado", "num": 3, "label": "Sistemas de freno", "specs": [["Tambor", "Delantero"], ["Disco", "Trasero"], ["E-ABS", "3 niveles"]], "cap": "Con control de tracción TCS, que evita que la rueda patine al acelerar o frenar fuerte."}, {"id": "lights", "cam": {"f": [300, 230], "z": 1.05}, "screen": "18", "callouts": [{"p": [440, 198], "dx": -60, "dy": -230, "len": 150, "t": "Faro automático", "s": "Sensor de luz"}, {"p": [300, 291], "dx": -40, "dy": 150, "len": 160, "t": "Luz ambiental RGB", "s": "Personalizable"}, {"p": [66, 299], "dx": 30, "dy": -170, "len": 140, "t": "Luz de freno", "s": "LED"}], "nav": "Iluminación", "v": "RGB", "eyebrow": "06 — Iluminación", "stat": "RGB", "label": "Luz ambiental en el deck", "specs": [["Auto", "Faro con sensor"], ["LED", "Luz de freno"], ["Manubrio", "Direccionales"]], "cap": "El faro se enciende solo al anochecer y el color de las luces del deck se elige desde la app."}, {"id": "smart", "cam": {"f": [405, 110], "z": 1.9, "t": [300, 560]}, "screen": "25", "callouts": [{"p": [396, 70], "dx": -40, "dy": -110, "len": 150, "t": "Pantalla", "s": "Velocidad y modo"}, {"p": [430, 180], "dx": -50, "dy": 110, "len": 150, "t": "IPX5", "s": "Resiste salpicaduras"}], "nav": "Conectividad", "v": "Find My", "eyebrow": "07 — Conectividad", "stat": "App", "label": "+ Apple Find My", "specs": [["Find My", "Localización iOS"], ["Proximidad", "Desbloqueo"], ["Crucero", "Control"]], "cap": "Encuéntralo desde tu iPhone, bloquéalo desde la app y desbloquéalo con solo acercarte."}, {"id": "speed", "cam": {"f": [300, 240], "z": 0.95}, "screen": "speed", "nav": "Velocidad", "v": "40 km/h", "eyebrow": "08 — Rendimiento", "num": 40, "unit": "km/h", "sup": "*", "label": "Velocidad máxima", "specs": [["3 + peatón", "Modos"], ["120 kg", "Carga máx."], ["25,3 kg", "Peso"]], "cap": "Medido en pruebas: 40,4 km/h reales. Respeta siempre el límite de tu ciudad.", "foot": "*Versión internacional. En la Unión Europea se limita a 25 km/h."}, {"id": "press", "cam": {"f": [300, 240], "z": 0.9}, "screen": "25", "d": 8800, "nav": "Prensa", "v": "4 reseñas", "eyebrow": "La prensa opina", "quotes": [["Es como un Rolls-Royce.", "New Atlas"], ["Un scooter sólido con una suspensión seria.", "The Gadgeteer"], ["Potente, divertido, útil.", "Cult of Mac"], ["El mejor scooter urbano de 2025.", "AndroidGuys"]], "fine": "Titulares de reseñas, traducidos del inglés."}, {"id": "outro", "cam": {"f": [300, 300], "z": 0.82}, "screen": "P", "d": 10000, "halt": 0, "nav": "Ficha técnica", "v": "Resumen", "eyebrow": "Navee", "stat": "ST3 PRO", "label": "Hecho para la ciudad", "sheet": [["bolt", "1.350 W", "Potencia pico"], ["pin", "75 km", "Autonomía declarada"], ["battery", "596,7 Wh", "Batería 48 V"], ["spring", "4 brazos", "Suspensión"], ["tire", "10\" × 2,5\"", "Tubeless"], ["slope", "28 %", "Pendiente máx."], ["weight", "25,3 kg", "Peso"], ["drop", "IPX5", "Resistencia al agua"], ["locate", "Find My", "Localización"]], "fine": "Animación de fan, no oficial. Datos de la ficha técnica oficial y reseñas independientes; pueden variar según el mercado."}]};
 const $=id=>document.getElementById(id);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)');
 const fmt=(n,d=0)=>n.toLocaleString(DATA.locale,{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -774,7 +798,13 @@ function showQuote(s,i){
 }
 function tick(t){
   const dt=Math.min(64,t-last);last=t;
-  if(playing){elapsed+=dt;if(elapsed>=dur())go(idx+1)}
+  if(playing){
+    elapsed+=dt;
+    if(elapsed>=dur()){
+      if(recOnce&&idx===scenes.length-1){elapsed=dur();recOnce=false;setPlaying(false);showExit(DATA.ui.recDone,true)}
+      else go(idx+1);
+    }
+  }
   const p=Math.min(1,elapsed/dur()),s=scenes[idx];
   fills[idx].style.transform=`scaleX(${p})`;
   chBtns[idx].style.setProperty('--p',p);
@@ -798,11 +828,12 @@ function setPlaying(p){
 /* ---------- Input: tap sides / hold / swipe ---------- */
 let down=null,holdTimer,held=false;
 stage.addEventListener('pointerdown',e=>{
-  if(e.button!==0)return;
+  if(e.button!==0||rec)return;
   down={x:e.clientX,y:e.clientY};held=false;
   holdTimer=setTimeout(()=>{if(playing){held=true;setPlaying(false)}},380);
 });
 stage.addEventListener('pointerup',e=>{
+  if(rec){showExit();return}
   clearTimeout(holdTimer);if(!down)return;
   const dx=e.clientX-down.x,dy=e.clientY-down.y;down=null;
   if(held){held=false;setPlaying(true);return}
@@ -828,8 +859,46 @@ function toggleFs(){
 }
 fsBtn.onclick=toggleFs;
 
+/* ---------- Recording mode (works from previews too: no navigation) ---------- */
+const root=document.documentElement,recUi=$('recUi'),recIntro=$('recIntro'),recCount=$('recCount'),recExit=$('recExit');
+let rec=false,recOnce=false,countTimer,exitTimer,wake=null;
+function enterRec(){
+  rec=true;recOnce=false;root.classList.add('rec');scrollTo(0,0);
+  setPlaying(false);go(0);
+  recUi.hidden=false;recIntro.hidden=false;recCount.hidden=true;recExit.hidden=true;
+  $('recGo').focus({preventScroll:true});
+}
+function startRec(){
+  const req=wrap.requestFullscreen||wrap.webkitRequestFullscreen;
+  if(req&&!fsEl()){try{const r=req.call(wrap);if(r&&r.catch)r.catch(()=>{})}catch(e){}}
+  if(navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>wake=w).catch(()=>{});
+  recIntro.hidden=true;recCount.hidden=false;
+  let n=3;
+  const show=()=>{recCount.textContent=n;recCount.style.animation='none';void recCount.offsetWidth;recCount.style.animation=''};
+  show();clearInterval(countTimer);
+  countTimer=setInterval(()=>{
+    if(--n>0)return show();
+    clearInterval(countTimer);recUi.hidden=true;recOnce=true;go(0);setPlaying(true);
+  },1000);
+}
+function exitRec(){
+  rec=false;recOnce=false;clearInterval(countTimer);clearTimeout(exitTimer);
+  root.classList.remove('rec');recUi.hidden=true;recExit.hidden=true;
+  if(fsEl())(document.exitFullscreen||document.webkitExitFullscreen).call(document);
+  if(wake){wake.release().catch(()=>{});wake=null}
+  if(/[?&]record\b/.test(location.search))try{history.replaceState(null,'',location.pathname)}catch(e){}
+  setPlaying(true);
+}
+function showExit(text,stay){
+  recExit.textContent=text||DATA.ui.recExit;recExit.hidden=false;recExit.classList.remove('hide');
+  clearTimeout(exitTimer);if(!stay)exitTimer=setTimeout(()=>recExit.classList.add('hide'),2500);
+}
+$('recBtn').onclick=enterRec;$('recChip').onclick=enterRec;
+$('recGo').onclick=startRec;$('recCancel').onclick=exitRec;recExit.onclick=exitRec;
+
 document.addEventListener('keydown',e=>{
   if(e.target.closest('input,textarea,select')||e.metaKey||e.ctrlKey||e.altKey)return;
+  if(rec){if(e.key==='Escape')exitRec();return}
   const onBtn=e.target.closest('button,a,summary');
   if(e.key==='ArrowRight'){e.preventDefault();go(idx+1)}
   else if(e.key==='ArrowLeft'){e.preventDefault();go(idx-1)}
@@ -848,6 +917,7 @@ document.addEventListener('visibilitychange',()=>{
 const start=+(new URLSearchParams(location.search).get('scene'))||0;
 idx=Math.min(scenes.length-1,Math.max(0,start));
 render();requestAnimationFrame(tick);
+if(root.classList.contains('rec'))enterRec();
 })();
 </script>
 </body>
