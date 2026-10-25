@@ -1,21 +1,25 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ST3 Pro en movimiento</title>
-<meta name="description" content="Presentación animada del scooter eléctrico Navee ST3 Pro: motor, batería, suspensión, llantas, frenos, conectividad y velocidad.">
+<title>ST3 Pro in Motion</title>
+<meta name="description" content="Animated showcase of the Navee ST3 Pro electric scooter: 1,350 W, 596.7 Wh, Damping Arm suspension, 10" tubeless tires, Apple Find My and IPX5.">
 <meta name="theme-color" content="#07090d">
+<meta property="og:title" content="ST3 Pro in Motion">
+<meta property="og:description" content="Animated showcase of the Navee ST3 Pro electric scooter: 1,350 W, 596.7 Wh, Damping Arm suspension, 10" tubeless tires, Apple Find My and IPX5.">
+<link rel="alternate" hreflang="es" href="st3-pro-es.html">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap">
+<script>if(/[?&]record\b/.test(location.search))document.documentElement.classList.add('rec')</script>
 <style>
 /* ---------- Tokens ---------- */
 :root{
   --ink:#07090d; --ink-2:#0b0f15; --panel:#11161e; --panel-2:#161d27;
   --line:#212a35; --line-2:#2e3946;
   --fg:#f2f4f7; --fg-2:#c7ced8; --muted:#808b99;
-  --gold:#e3a83f; --gold-2:#f7c76d; --gold-dim:#8f6526; --gold-soft:rgba(227,168,63,.14);
+  --gold:#e3a83f; --gold-2:#f7c76d; --gold-dim:#8f6526;
   --red:#ff4433;
   --f-display:"Oxanium","Arial Narrow",system-ui,sans-serif;
   --f-body:"Manrope",system-ui,-apple-system,sans-serif;
@@ -36,6 +40,7 @@ body{
 }
 [hidden]{display:none!important}
 button{font:inherit;color:inherit}
+a{color:inherit}
 
 /* ---------- Page layout ---------- */
 .app{
@@ -54,7 +59,7 @@ button{font:inherit;color:inherit}
 }
 .stage:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
 @media (min-width:960px){
-  .app{grid-template-columns:auto minmax(340px,420px);align-items:center;align-content:center;justify-content:center;gap:64px;padding:32px 48px}
+  .app{grid-template-columns:auto minmax(340px,430px);align-items:center;align-content:center;justify-content:center;gap:64px;padding:32px 48px}
   .player{width:auto}
   .stage{width:min(480px,calc((100svh - 170px) * 9 / 16))}
 }
@@ -63,114 +68,150 @@ button{font:inherit;color:inherit}
 .screen:-webkit-full-screen{background:#000;align-items:center}
 .screen:-webkit-full-screen .stage{width:min(100vw,100vh * 9 / 16);border-radius:0;border:0;box-shadow:none}
 
+/* recording mode (?record): bare 9:16 frame for screen capture */
+.rec body{background:#000}
+.rec .app{display:block;padding:0;min-height:0}
+.rec .player{gap:0}
+.rec .controls,.rec .hint,.rec .side,.rec .pause-ov{display:none}
+.rec .screen{height:100vh;align-items:center;background:#000}
+.rec .stage{width:min(100vw,100vh * 9 / 16);border-radius:0;border:0;box-shadow:none;cursor:none}
+
 /* ---------- World SVG ---------- */
 svg.world{position:absolute;inset:0;width:100%;height:100%;display:block}
 #cam{transition:transform 1.25s var(--ease-cam);will-change:transform}
-#city{transition:transform 1.25s var(--ease-cam)}
+#city{transition:transform 1.25s var(--ease-cam),opacity .8s}
 .layer{animation:pan var(--pan,60s) linear infinite}
 .layer.near{--pan:26s}
 @keyframes pan{to{transform:translateX(-900px)}}
 .win{fill:var(--gold);opacity:.22}
 .near .win{opacity:.12;fill:#cfe0ff}
+#night,#dim{opacity:0;transition:opacity .9s;pointer-events:none}
+[data-s="lights"] #night{opacity:.55}
+[data-s="lights"] #city{opacity:.55}
+[data-s="press"] #dim{opacity:.62}
 
 .road-dash{animation:dash .55s linear infinite}
 .road-dash.far{animation-duration:1.1s}
 @keyframes dash{to{stroke-dashoffset:-184}}
-[data-s="7"] .road-dash{animation-duration:.3s}
-[data-s="7"] .road-dash.far{animation-duration:.6s}
+[data-s="speed"] .road-dash{animation-duration:.3s}
+[data-s="speed"] .road-dash.far{animation-duration:.6s}
 
 /* wheels */
 .spin{transform-box:fill-box;transform-origin:center;animation:spin .55s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-[data-s="0"] .spin{animation-duration:.42s}
-[data-s="7"] .spin{animation-duration:.24s}
-[data-s="5"] .spin{animation-duration:1.2s}
+[data-s="intro"] .spin{animation-duration:.42s}
+[data-s="speed"] .spin{animation-duration:.24s}
+[data-s="brakes"] .spin{animation-duration:1.2s}
 .halt .spin,.halt .road-dash,.halt .layer,.halt .streak{animation-play-state:paused}
 
 /* vehicle entrance + body motions */
-[data-s="0"] #vehicle{animation:driveIn 1.9s var(--ease-out) both}
+[data-s="intro"] #vehicle{animation:driveIn 1.9s var(--ease-out) both}
 @keyframes driveIn{from{transform:translateX(-1300px)}}
 #drive{transform-origin:470px 360px}
-[data-s="3"] #drive{animation:bump .9s ease-in-out infinite}
+[data-s="suspension"] #drive{animation:bump .9s ease-in-out infinite}
 @keyframes bump{0%,100%{transform:translateY(0)}18%{transform:translateY(-8px) rotate(-.6deg)}38%{transform:translateY(2px)}60%{transform:translateY(-1px)}}
-[data-s="5"] #drive{animation:brake 1.3s var(--ease-out) both}
+[data-s="brakes"] #drive{animation:brake 1.3s var(--ease-out) both}
 @keyframes brake{0%{transform:translateX(-46px)}55%{transform:translateX(4px) rotate(1.8deg)}100%{transform:none}}
-[data-s="7"] #drive{animation:hum .16s linear infinite}
+[data-s="speed"] #drive{animation:hum .16s linear infinite}
 @keyframes hum{50%{transform:translateY(-.8px)}}
 
 /* streaks */
 .streak{stroke:#dfe6ee;stroke-width:2.5;stroke-linecap:round;opacity:0;animation:streak var(--t,.9s) linear infinite;animation-delay:var(--d,0s)}
 @keyframes streak{0%{opacity:0;transform:translateX(980px)}15%{opacity:var(--o,.5)}100%{opacity:0;transform:translateX(-420px)}}
 .streaks{opacity:0;transition:opacity .5s}
-[data-s="0"] .streaks,[data-s="7"] .streaks{opacity:1}
+[data-s="intro"] .streaks,[data-s="speed"] .streaks{opacity:1}
 
 /* light sweep */
 .sweep{transform:translateX(-260px)}
-[data-s="0"] .sweep{animation:sweep 1.4s 1.9s ease-in-out both}
-[data-s="8"] .sweep{animation:sweep 1.6s .9s ease-in-out both}
+[data-s="intro"] .sweep{animation:sweep 1.4s 1.9s ease-in-out both}
+[data-s="outro"] .sweep{animation:sweep 1.6s .9s ease-in-out both}
 @keyframes sweep{to{transform:translateX(760px)}}
 
 /* headlight */
 #beam{opacity:.7;transition:opacity .6s}
-[data-s="7"] #beam{opacity:1}
-[data-s="8"] #beam{opacity:.35}
+#lamp{transition:transform .6s;transform-box:fill-box;transform-origin:center}
+[data-s="speed"] #beam,[data-s="lights"] #beam{opacity:1}
+[data-s="lights"] #lamp{transform:scale(1.6)}
+[data-s="outro"] #beam{opacity:.35}
 
-/* fx shared */
 .fx{opacity:0;transition:opacity .6s}
 
-/* 1 motor */
-[data-s="1"] #motorFx{opacity:1}
+/* motor */
+[data-s="motor"] #motorFx{opacity:1}
 .orbit{transform-box:fill-box;transform-origin:center;animation:spin 3s linear infinite}
 .orbit.rev{animation-duration:4.5s;animation-direction:reverse}
-[data-s="1"] #motorRing{stroke:var(--gold-2)}
+[data-s="motor"] #motorRing{stroke:var(--gold-2)}
 #motorFx .core{animation:pulse 1.1s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.35}}
 
-/* 2 battery */
+/* battery */
 #deckSide{transition:opacity .6s}
-[data-s="2"] #deckSide{opacity:.15}
+[data-s="battery"] #deckSide{opacity:.15}
 .cell{fill:#1e2630;opacity:0;transition:opacity .5s .5s}
-[data-s="2"] .cell{opacity:1;animation:charge .35s steps(1) both}
+[data-s="battery"] .cell{opacity:1;animation:charge .35s steps(1) both}
 @keyframes charge{to{fill:var(--gold)}}
 #deckOutline{opacity:0;transition:opacity .6s}
-[data-s="2"] #deckOutline{opacity:1}
+[data-s="battery"] #deckOutline{opacity:1}
 
-/* 3 suspension */
+/* suspension */
 .arm{stroke:#c58f32;transition:stroke .4s}
-[data-s="3"] .arm{animation:armGlow .9s ease-in-out infinite}
+[data-s="suspension"] .arm{animation:armGlow .9s ease-in-out infinite}
 @keyframes armGlow{18%{stroke:#ffd88a;filter:drop-shadow(0 0 5px rgba(247,199,109,.9))}}
 #bumps{opacity:0;transition:opacity .4s}
-[data-s="3"] #bumps{opacity:1}
-[data-s="3"] #bumps path{animation:bumps .9s linear infinite}
+[data-s="suspension"] #bumps{opacity:1}
+[data-s="suspension"] #bumps path{animation:bumps .9s linear infinite}
 @keyframes bumps{to{transform:translateX(-281.25px)}}
 
-/* 4 tires */
-[data-s="4"] #tireFx{opacity:1}
+/* tires */
+[data-s="tires"] #tireFx{opacity:1}
 #frontTread{transition:stroke .5s}
-[data-s="4"] #frontTread{stroke:var(--gold)}
+[data-s="tires"] #frontTread{stroke:var(--gold)}
 
-/* 5 brakes */
+/* brakes */
 #discGlow,#tailGlow{opacity:0;transition:opacity .5s .4s}
-[data-s="5"] #discGlow{opacity:1}
-[data-s="5"] #tailGlow{opacity:1}
+[data-s="brakes"] #discGlow,[data-s="brakes"] #tailGlow,[data-s="lights"] #tailGlow{opacity:1}
 #tail{transition:fill .3s .3s}
-[data-s="5"] #tail{fill:#ff3b2b}
-[data-s="5"] #rotor{stroke:#ff8a5c;transition:stroke .5s .4s}
+[data-s="brakes"] #tail,[data-s="lights"] #tail{fill:#ff3b2b}
+[data-s="brakes"] #rotor{stroke:#ff8a5c;transition:stroke .5s .4s}
 
-/* 6 smart */
-[data-s="6"] .signal{animation:blink .7s steps(1) infinite}
+/* lights: RGB deck strip + signals */
+#rgbGlow{opacity:0;transition:opacity .8s}
+[data-s="lights"] #rgbGlow{opacity:.55;animation:rgbFill 4s linear infinite}
+[data-s="lights"] #rgb{stroke-width:2.6;animation:rgbStroke 4s linear infinite}
+@keyframes rgbStroke{0%,100%{stroke:#ff3b6b}20%{stroke:#ffb23b}40%{stroke:#3bffb0}60%{stroke:#3ba4ff}80%{stroke:#b84bff}}
+@keyframes rgbFill{0%,100%{fill:#ff3b6b}20%{fill:#ffb23b}40%{fill:#3bffb0}60%{fill:#3ba4ff}80%{fill:#b84bff}}
+[data-s="lights"] .signal,[data-s="smart"] .signal{animation:blink .7s steps(1) infinite}
 @keyframes blink{50%{fill:var(--gold-2)}}
+
+/* smart */
 #screen{transition:fill .5s}
-[data-s="6"] #screen,[data-s="7"] #screen{fill:#1d2a1d}
+[data-s="smart"] #screen,[data-s="speed"] #screen{fill:#1d2a1d}
 #screenTxt{fill:#6c7886;transition:fill .5s}
-[data-s="6"] #screenTxt,[data-s="7"] #screenTxt{fill:var(--gold-2)}
-[data-s="6"] #pingFx{opacity:1}
+[data-s="smart"] #screenTxt,[data-s="speed"] #screenTxt{fill:var(--gold-2)}
+[data-s="smart"] #pingFx{opacity:1}
 #pingFx circle{fill:none;stroke:var(--gold);stroke-width:1.4;transform-box:fill-box;transform-origin:center;animation:ping 2.2s ease-out infinite}
 #pingFx circle:nth-child(2){animation-delay:.73s}
 #pingFx circle:nth-child(3){animation-delay:1.46s}
 @keyframes ping{0%{opacity:.9;transform:scale(.2)}100%{opacity:0;transform:scale(5)}}
 
+/* phone mock (smart scene) */
+#phone{opacity:0;transform:translateX(90px);transition:opacity .6s,transform .9s var(--ease-out)}
+[data-s="smart"] #phone{opacity:1;transform:none;transition-delay:.55s}
+.ph-t{font:700 26px var(--f-display);fill:var(--fg);letter-spacing:.5px}
+.ph-s{font:600 15px var(--f-mono);fill:var(--gold-2);letter-spacing:1px;text-transform:uppercase}
+.ph-big{font:800 38px var(--f-display);fill:var(--fg)}
+.ph-m{font:500 15px var(--f-body);fill:var(--muted)}
+.ph-l{font:600 14.5px var(--f-body);fill:var(--fg-2)}
+#phRing{stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset 1.4s 1.1s var(--ease-out)}
+[data-s="smart"] #phRing{stroke-dashoffset:18}
+.ph-tile{fill:#141b24;stroke:#283240}
+.ph-tile.on{fill:rgba(227,168,63,.14);stroke:rgba(227,168,63,.6)}
+.ph-ic{fill:none;stroke:var(--gold);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+#phPin{transform-box:fill-box;transform-origin:center;animation:ping 2.2s ease-out infinite}
+
 /* HUD callouts */
+#hud{transition:opacity .25s}
+#hud.out{opacity:0}
 .co{opacity:0;animation:fade .5s .95s both}
 .co-line{fill:none;stroke:var(--gold);stroke-width:2;stroke-dasharray:1;stroke-dashoffset:1;animation:draw .6s 1s var(--ease-out) forwards}
 .co-dot{fill:var(--gold)}
@@ -185,14 +226,14 @@ svg.world{position:absolute;inset:0;width:100%;height:100%;display:block}
 /* ---------- Overlays ---------- */
 .scrim{position:absolute;inset:0;pointer-events:none;z-index:1;
   background:
-    linear-gradient(180deg,rgba(7,9,13,.75) 0%,rgba(7,9,13,0) 13%),
-    linear-gradient(0deg,rgba(7,9,13,.97) 0%,rgba(7,9,13,.88) 26%,rgba(7,9,13,0) 50%),
+    linear-gradient(180deg,rgba(7,9,13,.8) 0%,rgba(7,9,13,0) 14%),
+    linear-gradient(0deg,rgba(7,9,13,.97) 0%,rgba(7,9,13,.88) 27%,rgba(7,9,13,0) 52%),
     radial-gradient(130% 80% at 50% 40%,transparent 55%,rgba(0,0,0,.55) 100%)}
 .grain{position:absolute;inset:-50%;pointer-events:none;z-index:2;opacity:.07;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
 .top{position:absolute;inset:0 0 auto;z-index:3;padding:4cqw 4.4cqw 0;display:flex;flex-direction:column;gap:3.2cqw}
-.bars{display:flex;gap:1cqw}
+.bars{display:flex;gap:.9cqw}
 .bars span{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.17);overflow:hidden}
 .bars i{display:block;height:100%;background:var(--fg);transform:scaleX(0);transform-origin:left}
 .brand{display:flex;justify-content:space-between;align-items:center;font:600 2.6cqw var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--fg-2)}
@@ -203,43 +244,60 @@ svg.world{position:absolute;inset:0;width:100%;height:100%;display:block}
 .brand .count em{font-style:normal;color:var(--fg)}
 
 .copy{position:absolute;left:5.5cqw;right:5.5cqw;bottom:6.5cqw;z-index:3;display:flex;flex-direction:column;gap:2cqw}
+.copy.out>*{opacity:0;transform:translateY(-10px);transition:opacity .22s,transform .22s}
 .eyebrow{display:flex;align-items:center;gap:2.4cqw;margin:0;font:600 2.6cqw var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
 .eyebrow::before{content:"";width:7cqw;height:1.5px;background:currentColor}
 .stat{margin:0;display:flex;align-items:baseline;gap:1.6cqw;font:800 18cqw/.88 var(--f-display);letter-spacing:-.02em;font-variant-numeric:tabular-nums;
   background:linear-gradient(180deg,#fff 0%,#d9dee5 60%,#9aa5b3 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.in .stat{animation:wipe .9s var(--ease-out) both!important}
+@keyframes wipe{from{clip-path:inset(0 100% 0 0);transform:translateX(-8px)}to{clip-path:inset(0 -10% 0 0)}}
 .stat .unit{font-size:.36em;font-weight:700;letter-spacing:0;-webkit-text-fill-color:var(--gold);color:var(--gold)}
+.stat sup{font-size:.6em;vertical-align:.7em;margin-left:.08em;-webkit-text-fill-color:var(--muted)}
+[data-s="outro"] .stat{font-size:15cqw}
 .label{margin:0;font:600 4.5cqw/1.15 var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:var(--fg)}
-.specs{margin:1.6cqw 0 0;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line-2)}
-.specs div{display:flex;flex-direction:column-reverse;gap:.4cqw;padding:2.6cqw 2cqw 0 0}
+.specs{margin:1.4cqw 0 0;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line-2)}
+.specs div{display:flex;flex-direction:column-reverse;gap:.4cqw;padding:2.6cqw 2cqw 0 0;min-width:0}
 .specs div+div{padding-left:3cqw;border-left:1px solid var(--line)}
 .specs dt{font-size:2.5cqw;color:var(--muted);letter-spacing:.02em}
-.specs dd{margin:0;font:600 3.7cqw var(--f-mono);color:var(--fg);white-space:nowrap}
-.cap{margin:.6cqw 0 0;font-size:3.25cqw;line-height:1.5;color:var(--fg-2);max-width:38ch;text-wrap:pretty}
+.specs dd{margin:0;font:600 3.6cqw var(--f-mono);color:var(--fg);white-space:nowrap}
+.cap{margin:.4cqw 0 0;font-size:3.2cqw;line-height:1.5;color:var(--fg-2);max-width:40ch;text-wrap:pretty}
+.foot{margin:0;font-size:2.3cqw;color:var(--muted)}
 
-.range{margin-top:1.6cqw}
+.range{margin-top:1.2cqw}
 .range-track{position:relative;height:2.4cqw;border-radius:99px;background:var(--panel-2);border:1px solid var(--line-2);overflow:hidden}
 .range-fill{position:absolute;inset:0;background:linear-gradient(90deg,rgba(227,168,63,.15),rgba(227,168,63,.45));transform-origin:left;animation:grow 1.3s .4s var(--ease-out) both}
 .range-real{position:absolute;top:0;bottom:0;left:var(--a);width:calc(var(--b) - var(--a));background:var(--gold);box-shadow:0 0 12px var(--gold);animation:fade .5s 1.5s both;opacity:0}
 @keyframes grow{from{transform:scaleX(0)}}
-.range-scale{position:relative;height:7cqw;font:500 2.4cqw var(--f-mono);color:var(--muted)}
+.range-scale{position:relative;height:5.6cqw;font:500 2.4cqw var(--f-mono);color:var(--muted)}
 .range-scale span{position:absolute;top:1.6cqw;white-space:nowrap}
+.range-scale .r-min{left:0}
 .range-scale .r-real{left:var(--a);color:var(--gold-2)}
 .range-scale .r-real::before{content:"";position:absolute;left:0;top:-1.6cqw;height:1.2cqw;border-left:1px solid var(--gold)}
 .range-scale .r-max{right:0;color:var(--fg-2)}
-.range-scale .r-min{left:0}
 
-.sheet{list-style:none;margin:2cqw 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:1.6cqw}
-.sheet li{display:flex;flex-direction:column;gap:.6cqw;padding:2.6cqw 2.4cqw;border:1px solid var(--line-2);border-radius:3.2cqw;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,.01));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-.sheet svg{width:4.8cqw;height:4.8cqw;color:var(--gold);margin-bottom:.8cqw}
-.sheet b{font:600 3.6cqw var(--f-mono);white-space:nowrap}
-.sheet span{font-size:2.4cqw;color:var(--muted);line-height:1.3}
-.fine{margin:1.4cqw 0 0;font-size:2.3cqw;color:var(--muted);opacity:.8}
+.sheet{list-style:none;margin:1.6cqw 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5cqw}
+.sheet li{display:flex;flex-direction:column;gap:.3cqw;padding:2.2cqw 2.2cqw 2cqw;border:1px solid var(--line-2);border-radius:3cqw;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);min-width:0}
+.sheet svg{width:4.4cqw;height:4.4cqw;color:var(--gold);margin-bottom:.8cqw}
+.sheet b{font:600 3.3cqw var(--f-mono);white-space:nowrap}
+.sheet span{font-size:2.3cqw;color:var(--muted);line-height:1.3}
+.fine{margin:1cqw 0 0;font-size:2.2cqw;color:var(--muted);opacity:.85;line-height:1.45}
+
+.quote{margin:1cqw 0 0;min-height:44cqw;display:flex;flex-direction:column;justify-content:flex-end}
+.quote blockquote{position:relative;margin:0;font:700 8cqw/1.06 var(--f-display);letter-spacing:-.01em;text-wrap:balance}
+.quote blockquote::before{content:"\201C";display:block;font:800 22cqw/.7 var(--f-display);color:var(--gold);margin-bottom:1cqw}
+.quote figcaption{margin-top:3cqw;display:flex;align-items:center;gap:2cqw;font:600 2.8cqw var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--fg-2)}
+.quote figcaption::before{content:"";width:5cqw;height:1.5px;background:var(--gold)}
+.q-anim{animation:rise .6s var(--ease-out) both}
+.qdots{display:flex;gap:1.4cqw;margin-top:2cqw}
+.qdots i{width:7cqw;height:3px;border-radius:2px;background:rgba(255,255,255,.18);transition:background .3s}
+.qdots i.on{background:var(--gold)}
+.q-note{margin:.6cqw 0 0;font-size:2.2cqw;color:var(--muted)}
 
 .in>*{animation:rise .75s var(--ease-out) both}
-.in>*:nth-child(2){animation-delay:.08s}.in>*:nth-child(3){animation-delay:.16s}.in>*:nth-child(4){animation-delay:.24s}.in>*:nth-child(5){animation-delay:.32s}.in>*:nth-child(6){animation-delay:.4s}
+.in>*:nth-child(2){animation-delay:.08s}.in>*:nth-child(3){animation-delay:.16s}.in>*:nth-child(4){animation-delay:.24s}.in>*:nth-child(5){animation-delay:.32s}.in>*:nth-child(6){animation-delay:.4s}.in>*:nth-child(7){animation-delay:.48s}
 @keyframes rise{from{opacity:0;transform:translateY(16px);filter:blur(4px)}}
 .sheet li{animation:rise .6s var(--ease-out) both}
-.sheet li:nth-child(1){animation-delay:.3s}.sheet li:nth-child(2){animation-delay:.38s}.sheet li:nth-child(3){animation-delay:.46s}.sheet li:nth-child(4){animation-delay:.54s}.sheet li:nth-child(5){animation-delay:.62s}.sheet li:nth-child(6){animation-delay:.7s}
+.sheet li:nth-child(1){animation-delay:.3s}.sheet li:nth-child(2){animation-delay:.36s}.sheet li:nth-child(3){animation-delay:.42s}.sheet li:nth-child(4){animation-delay:.48s}.sheet li:nth-child(5){animation-delay:.54s}.sheet li:nth-child(6){animation-delay:.6s}.sheet li:nth-child(7){animation-delay:.66s}.sheet li:nth-child(8){animation-delay:.72s}.sheet li:nth-child(9){animation-delay:.78s}
 
 .pause-ov{position:absolute;inset:0;z-index:4;display:grid;place-items:center;pointer-events:none;opacity:0;transition:opacity .25s}
 .paused .pause-ov{opacity:1}
@@ -257,7 +315,6 @@ svg.world{position:absolute;inset:0;width:100%;height:100%;display:block}
 .btn.primary{width:56px;height:56px;background:var(--gold);border-color:var(--gold);color:var(--ink)}
 .btn.primary:hover{background:var(--gold-2)}
 .btn.primary svg{width:20px;height:20px;fill:currentColor;stroke:none}
-.sep{width:1px;height:24px;background:var(--line-2);margin:0 4px}
 .hint{margin:0;font-size:12.5px;color:var(--muted);text-align:center}
 kbd{font:600 11px var(--f-mono);padding:2px 6px;border-radius:5px;border:1px solid var(--line-2);border-bottom-width:2px;background:var(--panel);color:var(--fg-2)}
 .hint .touch{display:none}
@@ -265,37 +322,51 @@ kbd{font:600 11px var(--f-mono);padding:2px 6px;border-radius:5px;border:1px sol
 
 /* ---------- Side panel ---------- */
 .side{width:100%;max-width:480px}
-.kicker{margin:0 0 10px;font:600 11.5px var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.side-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.kicker{margin:0;font:600 11.5px var(--f-mono);letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.lang{display:flex;border:1px solid var(--line-2);border-radius:99px;padding:3px;font:600 11.5px var(--f-mono)}
+.lang a,.lang span{padding:4px 10px;border-radius:99px;text-decoration:none;color:var(--muted)}
+.lang span{background:var(--gold);color:var(--ink)}
+.lang a:hover{color:var(--fg)}
 .side h1{margin:0;font:800 clamp(38px,6vw,54px)/.95 var(--f-display);letter-spacing:-.02em}
 .side h1 span{color:var(--gold)}
-.lead{margin:14px 0 26px;color:var(--fg-2);font-size:15.5px;max-width:42ch}
+.lead{margin:14px 0 22px;color:var(--fg-2);font-size:15.5px;max-width:44ch}
 .chapters{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
-.chapters button{position:relative;width:100%;display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;padding:13px 6px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;cursor:pointer;transition:background .2s}
+.chapters button{position:relative;width:100%;display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:10px;padding:10.5px 6px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;cursor:pointer;transition:background .2s}
 .chapters button:hover{background:rgba(255,255,255,.025)}
 .chapters button:focus-visible{outline:2px solid var(--gold);outline-offset:-2px}
 .ch-n{font:600 11.5px var(--f-mono);color:var(--muted)}
-.ch-t{font:600 15px var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:var(--fg-2);transition:color .2s}
-.ch-v{font:500 12.5px var(--f-mono);color:var(--muted)}
+.ch-t{font:600 14.5px var(--f-display);letter-spacing:.04em;text-transform:uppercase;color:var(--fg-2);transition:color .2s}
+.ch-v{font:500 12px var(--f-mono);color:var(--muted)}
 .ch-p{position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--gold);transform:scaleX(var(--p,0));transform-origin:left}
 .chapters [aria-current="step"] .ch-t{color:var(--fg)}
 .chapters [aria-current="step"] .ch-n,.chapters [aria-current="step"] .ch-v{color:var(--gold)}
-.note{margin:22px 0 0;font-size:12.5px;color:var(--muted);line-height:1.6;max-width:46ch}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border-radius:99px;border:1px solid var(--line-2);background:var(--panel);font:600 12px var(--f-mono);text-decoration:none;color:var(--fg-2);transition:border-color .2s}
+.chip:hover{border-color:var(--gold);color:var(--fg)}
+.chip svg{width:14px;height:14px;fill:none;stroke:var(--gold);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+details.sources{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
+details.sources summary{cursor:pointer;font:600 12px var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--fg-2)}
+details.sources ul{margin:10px 0 0;padding-left:18px;font-size:13px;color:var(--muted);line-height:1.7}
+details.sources a{color:var(--fg-2);text-decoration-color:var(--line-2);text-underline-offset:3px}
+details.sources a:hover{color:var(--gold)}
+.note{margin:14px 0 0;font-size:12.5px;color:var(--muted);line-height:1.6;max-width:50ch}
 
 @media (prefers-reduced-motion:reduce){
-  #cam,#city{transition:none}
+  #cam,#city,#phone{transition:none}
   .stage *,.in>*,.sheet li{animation:none!important}
   .co,.co-t,.co-s,.range-real{opacity:1}
   .co-line{stroke-dashoffset:0}
   .cell{transition:none}
-  [data-s="2"] .cell{fill:var(--gold)}
+  [data-s="battery"] .cell{fill:var(--gold)}
 }
 </style>
 </head>
 <body>
 <main class="app">
-  <section class="player" aria-label="Reproductor">
+  <section class="player" aria-label="Player">
     <div class="screen" id="screenWrap">
-      <div class="stage" id="stage" data-s="0" tabindex="0" role="region" aria-roledescription="presentación" aria-label="Animación del Navee ST3 Pro. Toca los lados para cambiar de escena o el centro para pausar.">
+      <div class="stage" id="stage" data-s="intro" tabindex="0" role="region" aria-roledescription="presentation" aria-label="Navee ST3 Pro animation. Tap the sides to change scenes or the center to pause.">
         <svg class="world" viewBox="0 0 900 1600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
           <defs>
             <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
@@ -305,6 +376,8 @@ kbd{font:600 11px var(--f-mono);padding:2px 6px;border-radius:5px;border:1px sol
             <linearGradient id="hazeG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c121b" stop-opacity="0"/><stop offset="1" stop-color="#121a25" stop-opacity=".85"/></linearGradient>
             <linearGradient id="floorG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#121821"/><stop offset=".3" stop-color="#0a0e13"/><stop offset="1" stop-color="#05070a"/></linearGradient>
             <radialGradient id="shadowG" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".8"/><stop offset=".6" stop-color="#000" stop-opacity=".35"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+            <radialGradient id="softG" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff" stop-opacity="1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+            <mask id="softMask" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#softG)"/></mask>
             <linearGradient id="reflG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".2"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient>
             <mask id="reflMask" maskUnits="userSpaceOnUse" x="-900" y="750" width="2700" height="400"><rect x="-900" y="750" width="2700" height="400" fill="url(#reflG)"/></mask>
 
@@ -313,12 +386,12 @@ kbd{font:600 11px var(--f-mono);padding:2px 6px;border-radius:5px;border:1px sol
             <radialGradient id="tireG" cx=".5" cy=".5" r=".5"><stop offset=".66" stop-color="#0b0e12"/><stop offset=".82" stop-color="#1e242c"/><stop offset=".95" stop-color="#14181d"/><stop offset="1" stop-color="#0a0c10"/></radialGradient>
             <radialGradient id="rimG" cx=".42" cy=".38" r=".7"><stop offset="0" stop-color="#5d6877"/><stop offset=".6" stop-color="#323b47"/><stop offset="1" stop-color="#1b2129"/></radialGradient>
             <radialGradient id="hubG" cx=".38" cy=".34" r=".75"><stop offset="0" stop-color="#6b7684"/><stop offset=".55" stop-color="#363f4b"/><stop offset="1" stop-color="#1a1f27"/></radialGradient>
-            <linearGradient id="armG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f2c26a"/><stop offset="1" stop-color="#a87526"/></linearGradient>
             <radialGradient id="goldGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f7c76d" stop-opacity=".75"/><stop offset=".45" stop-color="#e3a83f" stop-opacity=".22"/><stop offset="1" stop-color="#e3a83f" stop-opacity="0"/></radialGradient>
             <radialGradient id="redGlow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ff6a3d" stop-opacity=".85"/><stop offset=".5" stop-color="#ff4433" stop-opacity=".25"/><stop offset="1" stop-color="#ff4433" stop-opacity="0"/></radialGradient>
             <radialGradient id="lampG" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff8e6" stop-opacity=".95"/><stop offset=".35" stop-color="#ffe9b8" stop-opacity=".35"/><stop offset="1" stop-color="#ffe9b8" stop-opacity="0"/></radialGradient>
             <linearGradient id="beamG" x1="0" x2="1"><stop offset="0" stop-color="#fff2cf" stop-opacity=".32"/><stop offset=".5" stop-color="#fff2cf" stop-opacity=".08"/><stop offset="1" stop-color="#fff2cf" stop-opacity="0"/></linearGradient>
             <linearGradient id="sweepG" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".38"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+            <linearGradient id="phoneG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0f141b"/><stop offset="1" stop-color="#090c11"/></linearGradient>
             <pattern id="gripP" width="4" height="4" patternUnits="userSpaceOnUse"><rect width="4" height="4" fill="#0f1318"/><circle cx="2" cy="2" r=".7" fill="#1f262f"/></pattern>
             <mask id="artMask" mask-type="alpha" maskUnits="userSpaceOnUse" x="-50" y="-50" width="700" height="500"><use href="#art"/></mask>
 
@@ -339,6 +412,7 @@ kbd{font:600 11px var(--f-mono);padding:2px 6px;border-radius:5px;border:1px sol
             <rect x="-200" y="520" width="1300" height="232" fill="url(#hazeG)"/>
             <g class="layer near" id="cityNear"></g>
           </g>
+          <rect id="night" x="-100" y="0" width="1100" height="760" fill="#000"/>
 
           <g id="cam">
             <!-- floor -->
@@ -356,8 +430,8 @@ kbd{font:600 11px var(--f-mono);padding:2px 6px;border-radius:5px;border:1px sol
               <ellipse cx="662" cy="751" rx="70" ry="7" fill="#000" opacity=".7"/>
 
               <g id="rig" transform="translate(75 300) scale(1.25)"><g id="drive">
-                <!-- headlight beam (behind body) -->
                 <polygon id="beam" points="442,190 780,128 780,292 442,206" fill="url(#beamG)"/>
+                <ellipse id="rgbGlow" cx="300" cy="352" rx="170" ry="16" fill="#3ba4ff" mask="url(#softMask)"/>
 
                 <g id="art">
                   <!-- rear fender + tail -->
@@ -421,7 +495,7 @@ kbd{font:600 11px var(--f-mono);padding:2px 6px;border-radius:5px;border:1px sol
                     <rect class="cell" x="386" y="274" width="24" height="12" rx="2" style="animation-delay:2.26s"/>
                   </g>
                   <rect id="deckOutline" x="184" y="271" width="232" height="18" rx="6" fill="none" stroke="#e3a83f" stroke-width="1" stroke-dasharray="3 3"/>
-                  <line x1="182" y1="291.5" x2="424" y2="291.5" stroke="#c58f32" stroke-width="1.1" opacity=".75"/>
+                  <line id="rgb" x1="182" y1="291.5" x2="424" y2="291.5" stroke="#c58f32" stroke-width="1.1" stroke-linecap="round"/>
                   <path d="M240 294 L216 299" stroke="#1a1f26" stroke-width="4" stroke-linecap="round"/>
 
                   <!-- front arm + shock -->
@@ -461,8 +535,7 @@ kbd{font:600 11px var(--f-mono);padding:2px 6px;border-radius:5px;border:1px sol
                 <!-- light sweep (masked to body) -->
                 <g mask="url(#artMask)"><rect class="sweep" x="-60" y="40" width="110" height="340" fill="url(#sweepG)" transform="skewX(-18)"/></g>
 
-                <!-- lamp glow -->
-                <circle cx="441" cy="198" r="22" fill="url(#lampG)"/>
+                <circle id="lamp" cx="441" cy="198" r="22" fill="url(#lampG)"/>
 
                 <!-- scene fx -->
                 <g id="motorFx" class="fx" transform="translate(130 312)">
@@ -481,7 +554,36 @@ kbd{font:600 11px var(--f-mono);padding:2px 6px;border-radius:5px;border:1px sol
             </g>
           </g>
 
+          <rect id="dim" x="0" y="0" width="900" height="1600" fill="#07090d"/>
           <g class="streaks" id="streaks"></g>
+
+          <!-- companion app mock (smart scene) -->
+          <g id="phone">
+            <rect x="572" y="236" width="252" height="500" rx="40" fill="#1c232c" stroke="#3a4553" stroke-width="2"/>
+            <rect x="582" y="246" width="232" height="480" rx="31" fill="url(#phoneG)"/>
+            <rect x="664" y="258" width="68" height="18" rx="9" fill="#000"/>
+            <text class="ph-t" x="604" y="322">ST3 Pro</text>
+            <circle cx="609" cy="345" r="4.5" fill="#5ad19a"/>
+            <text class="ph-s" x="621" y="350">Connected</text>
+            <circle cx="698" cy="440" r="62" fill="none" stroke="#1d2530" stroke-width="12"/>
+            <circle id="phRing" cx="698" cy="440" r="62" fill="none" stroke="#e3a83f" stroke-width="12" stroke-linecap="round" pathLength="100" transform="rotate(-90 698 440)"/>
+            <text class="ph-big" x="698" y="447" text-anchor="middle">82%</text>
+            <text class="ph-m" x="698" y="472" text-anchor="middle">≈ 25 mi</text>
+            <rect class="ph-tile on" x="600" y="530" width="94" height="74" rx="16"/>
+            <rect class="ph-tile" x="702" y="530" width="94" height="74" rx="16"/>
+            <rect class="ph-tile" x="600" y="612" width="94" height="74" rx="16"/>
+            <rect class="ph-tile on" x="702" y="612" width="94" height="74" rx="16"/>
+            <path class="ph-ic" d="M612 560v-6a9 9 0 0 1 18 0v6M609 560h24v16h-24z"/>
+            <text class="ph-l" x="612" y="594">Lock</text>
+            <path class="ph-ic" d="M723 572s-9-8-9-15a9 9 0 0 1 18 0c0 7-9 15-9 15z"/><circle id="phPin" cx="723" cy="557" r="3" fill="#e3a83f"/>
+            <text class="ph-l" x="714" y="594">Find My</text>
+            <path class="ph-ic" d="M612 656a11 11 0 0 1 22 0M623 656l6-7"/>
+            <text class="ph-l" x="612" y="676">Cruise</text>
+            <path class="ph-ic" d="M727 634l-11 14h9l-2 10 11-14h-9z"/>
+            <text class="ph-l" x="714" y="676">Sport</text>
+            <text class="ph-m" x="698" y="712" text-anchor="middle">Proximity unlock</text>
+          </g>
+
           <g id="hud"></g>
         </svg>
 
@@ -495,7 +597,7 @@ kbd{font:600 11px var(--f-mono);padding:2px 6px;border-radius:5px;border:1px sol
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="#e3a83f" stroke-width="1.5"/><path d="M13.2 5.5 7.8 13h4l-1 5.5 5.4-7.5h-4z" fill="#e3a83f"/></svg>
               <span><b>NAVEE</b> ST3 PRO</span>
             </span>
-            <span class="count" id="count"><em>01</em> / 09</span>
+            <span class="count" id="count"></span>
           </div>
         </header>
 
@@ -505,32 +607,52 @@ kbd{font:600 11px var(--f-mono);padding:2px 6px;border-radius:5px;border:1px sol
     </div>
 
     <div class="controls">
-      <button class="btn" id="restart" type="button" aria-label="Volver al inicio" title="Inicio"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
-      <button class="btn" id="prev" type="button" aria-label="Escena anterior" title="Anterior"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <button class="btn primary" id="play" type="button" aria-label="Pausar" title="Pausar"><svg viewBox="0 0 24 24" id="playIcon"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg></button>
-      <button class="btn" id="next" type="button" aria-label="Escena siguiente" title="Siguiente"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
-      <button class="btn" id="fs" type="button" aria-label="Pantalla completa" title="Pantalla completa"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      <button class="btn" id="restart" type="button" aria-label="Back to start" title="Back to start"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+      <button class="btn" id="prev" type="button" aria-label="Previous scene" title="Previous scene"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <button class="btn primary" id="play" type="button" aria-label="Pause" title="Pause"><svg viewBox="0 0 24 24" id="playIcon"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg></button>
+      <button class="btn" id="next" type="button" aria-label="Next scene" title="Next scene"><svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
+      <button class="btn" id="fs" type="button" aria-label="Full screen" title="Full screen"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     </div>
     <p class="hint">
-      <span class="keys"><kbd>←</kbd> <kbd>→</kbd> navegar · <kbd>Espacio</kbd> pausa · <kbd>F</kbd> pantalla completa</span>
-      <span class="touch">Toca los lados para navegar · mantén presionado para pausar</span>
+      <span class="keys"><kbd>←</kbd> <kbd>→</kbd> navigate · <kbd>Space</kbd> pause · <kbd>F</kbd> full screen</span>
+      <span class="touch">Tap the sides to navigate · press and hold to pause</span>
     </p>
   </section>
 
   <aside class="side">
-    <p class="kicker">Presentación animada</p>
+    <div class="side-top">
+      <p class="kicker">Animated showcase</p>
+      <nav class="lang" aria-label="Language"><a href="st3-pro-es.html" hreflang="es" lang="es">ES</a><span aria-current="true">EN</span></nav>
+    </div>
     <h1>Navee <span>ST3 Pro</span></h1>
-    <p class="lead">El scooter eléctrico para la ciudad, explicado en nueve escenas: motor, batería, suspensión, llantas, frenos, conectividad y velocidad.</p>
+    <p class="lead">The city electric scooter, in eleven scenes: motor, battery, suspension, tires, brakes, lights, connectivity, speed and what the press says.</p>
     <ol class="chapters" id="chapters"></ol>
-    <p class="note">Animación de fan, no oficial. Datos tomados de fichas técnicas y reseñas públicas. La autonomía real depende del peso, el terreno, el clima y el modo de manejo.</p>
+    <div class="tools">
+      <a class="chip" href="?record"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="#e3a83f" stroke="none"/></svg>9:16 recording mode</a>
+    </div>
+    <details class="sources">
+      <summary>Sources</summary>
+      <ul>
+        <li><a href="https://eu.naveetech.com/en-nordic/products/navee-st3-pro-e-scooter" target="_blank" rel="noopener">NAVEE — official spec sheet (EU)</a></li>
+        <li><a href="https://newatlas.com/urban-transport/review-navee-st3-pro-scooter/" target="_blank" rel="noopener">New Atlas</a></li>
+        <li><a href="https://the-gadgeteer.com/2025/05/21/naveetech-st3-pro-electric-scooter-review-solid-scooter-with-serious-suspension/" target="_blank" rel="noopener">The Gadgeteer</a></li>
+        <li><a href="https://www.cultofmac.com/reviews/navee-st3-pro-electric-scooter" target="_blank" rel="noopener">Cult of Mac</a></li>
+        <li><a href="https://androidguys.com/featured/navee-st3-pro-review/" target="_blank" rel="noopener">AndroidGuys</a></li>
+        <li><a href="https://eridehero.com/navee-st3-pro-review/" target="_blank" rel="noopener">ERideHero</a></li>
+        <li><a href="https://aridejunkie.com/navee-st3-pro-review/" target="_blank" rel="noopener">Ride Junkie</a></li>
+        <li><a href="https://9to5toys.com/2025/08/22/navee-st3-pro-scooter-review/" target="_blank" rel="noopener">9to5Toys</a></li>
+      </ul>
+    </details>
+    <p class="note">Unofficial fan animation. Data from the official spec sheet and independent reviews. Some figures (top speed, rated power) vary by market. Real-world range depends on rider weight, terrain, weather and riding mode.</p>
   </aside>
 </main>
 
 <script>
 (()=>{
+const DATA={"locale": "en-US", "ui": {"scene": "Scene", "pause": "Pause", "play": "Play"}, "scenes": [{"id": "intro", "cam": {"f": [300, 205], "z": 1.15}, "d": 5600, "screen": "25", "nav": "Intro", "v": "ST3 Pro", "eyebrow": "Introducing", "stat": "ST3 PRO", "label": "Navee · Urban mobility", "cap": "Plenty of power, four-arm suspension and smart tech for getting around the city."}, {"id": "motor", "cam": {"f": [130, 312], "z": 2.3}, "screen": "25", "callouts": [{"p": [146, 300], "dx": 60, "dy": -190, "len": 170, "t": "Rear motor", "s": "600 W rated"}], "nav": "Motor", "v": "1,350 W", "eyebrow": "01 — Motor", "num": 1350, "unit": "W", "label": "Peak power", "specs": [["600 W", "Rated"], ["28%", "Max. grade"], ["Rear", "Drive"]], "cap": "In independent testing it climbed a 17% grade at 10.5 mph."}, {"id": "battery", "cam": {"f": [300, 270], "z": 1.85}, "screen": "25", "callouts": [{"p": [250, 272], "dx": 40, "dy": -120, "len": 170, "t": "48 V pack", "s": "Built into the deck"}], "nav": "Battery", "v": "596.7 Wh", "eyebrow": "02 — Battery", "num": 596.7, "dec": 1, "unit": "Wh", "label": "48 V battery", "range": {"a": 53.65, "b": 66.52, "real": "Tested 25–31 mi", "max": "Max 46.6 mi"}, "specs": [["48 V", "Voltage"], ["18650", "Cells 13S5P"], ["8–10 h", "Full charge"]], "cap": "Up to 46.6 miles claimed at 9 mph. Real-world tests: 25 to 31 miles."}, {"id": "suspension", "cam": {"f": [300, 290], "z": 1.15}, "screen": "22", "callouts": [{"p": [172, 301], "dx": -40, "dy": 190, "len": 150, "t": "Rear", "s": "2 arms"}, {"p": [454, 300], "dx": 40, "dy": 190, "len": 150, "t": "Front", "s": "2 arms"}], "nav": "Suspension", "v": "4 arms", "eyebrow": "03 — Suspension", "num": 4, "label": "Damping Arm suspension", "specs": [["2", "Front"], ["2", "Rear"], ["Elastomer", "Damping"]], "cap": "Reviewers call it one of the smoothest rides in its class. Potholes, cracks and curbs disappear."}, {"id": "tires", "cam": {"f": [470, 312], "z": 2.3}, "screen": "25", "callouts": [{"p": [504, 278], "dx": 50, "dy": -90, "len": 160, "t": "10\" Tubeless", "s": "Self-sealing"}], "nav": "Tires", "v": "10\" × 2.5\"", "eyebrow": "04 — Tires", "stat": "10\"", "label": "Self-sealing tubeless", "specs": [["10\" × 2.5\"", "Size"], ["Tubeless", "No inner tube"], ["Sealant gel", "Puncture-resistant"]], "cap": "Wide tires that seal small punctures on their own and grip the road better."}, {"id": "brakes", "cam": {"f": [300, 260], "z": 1.1}, "screen": "0", "halt": 950, "callouts": [{"p": [130, 312], "dx": 30, "dy": 170, "len": 130, "t": "Disc", "s": "Rear"}, {"p": [470, 312], "dx": -30, "dy": 170, "len": 130, "t": "Drum", "s": "Front"}], "nav": "Braking", "v": "3 + TCS", "eyebrow": "05 — Braking", "num": 3, "label": "Braking systems", "specs": [["Drum", "Front"], ["Disc", "Rear"], ["E-ABS", "3 levels"]], "cap": "Plus TCS traction control, which keeps the wheel from slipping under hard acceleration or braking."}, {"id": "lights", "cam": {"f": [300, 230], "z": 1.05}, "screen": "18", "callouts": [{"p": [440, 198], "dx": -60, "dy": -230, "len": 150, "t": "Auto headlight", "s": "Light sensor"}, {"p": [300, 291], "dx": -40, "dy": 150, "len": 160, "t": "RGB ambient light", "s": "Customizable"}, {"p": [66, 299], "dx": 30, "dy": -170, "len": 140, "t": "Brake light", "s": "LED"}], "nav": "Lighting", "v": "RGB", "eyebrow": "06 — Lighting", "stat": "RGB", "label": "Deck ambient lighting", "specs": [["Auto", "Light-sensing lamp"], ["LED", "Brake light"], ["Handlebar", "Turn signals"]], "cap": "The headlight switches on by itself at dusk, and you pick the deck light color in the app."}, {"id": "smart", "cam": {"f": [405, 110], "z": 1.9, "t": [300, 560]}, "screen": "25", "callouts": [{"p": [396, 70], "dx": -40, "dy": -110, "len": 150, "t": "Display", "s": "Speed and mode"}, {"p": [430, 180], "dx": -50, "dy": 110, "len": 150, "t": "IPX5", "s": "Splash resistant"}], "nav": "Connectivity", "v": "Find My", "eyebrow": "07 — Connectivity", "stat": "App", "label": "+ Apple Find My", "specs": [["Find My", "iOS tracking"], ["Proximity", "Unlock"], ["Cruise", "Control"]], "cap": "Find it from your iPhone, lock it from the app and unlock it just by walking up."}, {"id": "speed", "cam": {"f": [300, 240], "z": 0.95}, "screen": "speed", "nav": "Speed", "v": "25 mph", "eyebrow": "08 — Performance", "num": 25, "unit": "mph", "sup": "*", "label": "Top speed", "specs": [["3 + walk", "Modes"], ["265 lb", "Max. load"], ["55.8 lb", "Weight"]], "cap": "Clocked at 25.1 mph in independent testing. Always ride within local limits.", "foot": "*US version. EU models are limited to 25 km/h (15.5 mph)."}, {"id": "press", "cam": {"f": [300, 240], "z": 0.9}, "screen": "25", "d": 8800, "nav": "Press", "v": "4 reviews", "eyebrow": "What reviewers say", "quotes": [["It's like a Rolls-Royce.", "New Atlas"], ["Solid scooter with serious suspension.", "The Gadgeteer"], ["Powerful, fun, useful.", "Cult of Mac"], ["The Best Commuter Scooter of 2025.", "AndroidGuys"]], "fine": "Review headlines."}, {"id": "outro", "cam": {"f": [300, 300], "z": 0.82}, "screen": "P", "d": 10000, "halt": 0, "nav": "Spec sheet", "v": "Summary", "eyebrow": "Navee", "stat": "ST3 PRO", "label": "Built for the city", "sheet": [["bolt", "1,350 W", "Peak power"], ["pin", "46.6 mi", "Claimed range"], ["battery", "596.7 Wh", "48 V battery"], ["spring", "4 arms", "Suspension"], ["tire", "10\" × 2.5\"", "Tubeless"], ["slope", "28%", "Max. grade"], ["weight", "55.8 lb", "Weight"], ["drop", "IPX5", "Water resistance"], ["locate", "Find My", "Tracking"]], "fine": "Unofficial fan animation. Data from the official spec sheet and independent reviews; may vary by market."}]};
 const $=id=>document.getElementById(id);
 const reduce=matchMedia('(prefers-reduced-motion: reduce)');
-const fmt=(n,d=0)=>n.toLocaleString('es-CO',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmt=(n,d=0)=>n.toLocaleString(DATA.locale,{minimumFractionDigits:d,maximumFractionDigits:d});
 
 const ICON={
   bolt:'<path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12z"/>',
@@ -538,48 +660,14 @@ const ICON={
   battery:'<rect x="2.5" y="7" width="17" height="10" rx="2.2"/><path d="M22 10.5v3M6 10.5v3M9.5 10.5v3M13 10.5v3"/>',
   tire:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/><path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21"/>',
   drop:'<path d="M12 3.2s6 6.4 6 10.8a6 6 0 0 1-12 0c0-4.4 6-10.8 6-10.8z"/>',
-  locate:'<circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>'
+  locate:'<circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>',
+  spring:'<path d="M12 2v3M12 19v3M7 5h10L7 8.5h10L7 12h10L7 15.5h10L7 19h10"/>',
+  slope:'<path d="M3 20h18V6z"/><path d="M8 20a5 5 0 0 0-1.6-3.7"/>',
+  weight:'<path d="M6.5 9h11l2.3 11H4.2z"/><circle cx="12" cy="6" r="2.6"/>'
 };
 const svgIcon=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
 
-// cam.f = focus point in scooter coords, cam.z = zoom
-const scenes=[
-  {nav:'Presentación',v:'ST3 Pro',eyebrow:'Presentamos',stat:'ST3 PRO',label:'Navee · Movilidad urbana',cap:'Potencia, comodidad y tecnología para moverte por la ciudad sin complicaciones.',cam:{f:[300,205],z:1.15},d:5600,screen:'25'},
-  {nav:'Motor',v:'1.350 W',eyebrow:'01 — Motor',num:1350,unit:'W',label:'Potencia pico',
-    specs:[['600 W','Nominal'],['28 %','Pendiente máx.'],['Trasero','Tracción']],
-    cap:'Motor en la rueda trasera con fuerza de sobra para las subidas de la ciudad.',
-    cam:{f:[130,312],z:2.3},callouts:[{p:[146,300],dx:60,dy:-190,len:170,t:'Motor trasero',s:'600 W nominales'}],screen:'25'},
-  {nav:'Batería',v:'596,7 Wh',eyebrow:'02 — Batería',num:596.7,dec:1,unit:'Wh',label:'Batería de 48 V',
-    range:{max:75,real:[40,50]},
-    cap:'Hasta 75 km de autonomía declarada. En pruebas reales, entre 40 y 50 km.',
-    cam:{f:[300,270],z:1.85},callouts:[{p:[250,272],dx:40,dy:-120,len:170,t:'Pack 48 V',s:'Integrado en el deck'}],screen:'25'},
-  {nav:'Suspensión',v:'4 brazos',eyebrow:'03 — Suspensión',num:4,label:'Brazos Damping Arm',
-    specs:[['2','Delanteros'],['2','Traseros'],['Doble','Amortiguación']],
-    cap:'Se tragan los baches, las grietas y los andenes. Menos vibración, más control.',
-    cam:{f:[300,290],z:1.15},callouts:[{p:[172,301],dx:-40,dy:190,len:150,t:'Trasera',s:'2 brazos'},{p:[454,300],dx:40,dy:190,len:150,t:'Delantera',s:'2 brazos'}],screen:'22'},
-  {nav:'Llantas',v:'10"',eyebrow:'04 — Llantas',stat:'10"',label:'Sin cámara y autosellantes',
-    specs:[['10"','Diámetro'],['Tubeless','Sin cámara'],['Sellante','Anti-pinchazos']],
-    cap:'Más agarre en el asfalto mojado y muchísimos menos pinchazos.',
-    cam:{f:[470,312],z:2.3},callouts:[{p:[504,278],dx:50,dy:-90,len:160,t:'10" Tubeless',s:'Autosellante'}],screen:'25'},
-  {nav:'Frenado',v:'3 sistemas',eyebrow:'05 — Frenado',num:3,label:'Sistemas de freno',
-    specs:[['Tambor','Delantero'],['Disco','Trasero'],['E-ABS','Regenerativo']],
-    cap:'Con control de tracción TCS para mantener el agarre en cada frenada.',
-    cam:{f:[300,260],z:1.1},callouts:[{p:[130,312],dx:30,dy:170,len:130,t:'Disco',s:'Trasero'},{p:[470,312],dx:-30,dy:170,len:130,t:'Tambor',s:'Delantero'}],halt:950,screen:'0'},
-  {nav:'Conectividad',v:'Find My',eyebrow:'06 — Conectividad',stat:'App',label:'+ Apple Find My',
-    specs:[['Find My','Localización'],['IPX5','Agua'],['Manubrio','Direccionales']],
-    cap:'Encuéntralo desde tu iPhone, controla todo desde la app y circula con lluvia ligera.',
-    cam:{f:[410,130],z:2},callouts:[{p:[396,70],dx:-40,dy:-100,len:150,t:'Pantalla',s:'App + Find My'},{p:[450,72],dx:50,dy:-80,len:150,t:'Direccionales',s:'En el manubrio'},{p:[432,190],dx:60,dy:70,len:150,t:'IPX5',s:'Resiste salpicaduras'}],screen:'25'},
-  {nav:'Velocidad',v:'40 km/h',eyebrow:'07 — Rendimiento',num:40,unit:'km/h',label:'Velocidad máxima',
-    specs:[['3','Modos'],['120 kg','Carga máx.'],['40 km/h','Tope']],
-    cap:'Elige el modo según el trayecto. Y respeta siempre el límite de tu ciudad.',
-    cam:{f:[300,240],z:.95},screen:'speed'},
-  {nav:'Ficha técnica',v:'Resumen',eyebrow:'Navee',stat:'ST3 PRO',label:'Hecho para la ciudad',
-    sheet:[['bolt','1.350 W','Potencia pico'],['pin','75 km','Autonomía declarada'],['battery','596,7 Wh','Batería 48 V'],['tire','10"','Tubeless'],['drop','IPX5','Resistencia al agua'],['locate','Find My','Localización']],
-    fine:'Animación de fan, no oficial. Datos de fichas técnicas y reseñas públicas.',
-    cam:{f:[300,300],z:.82},d:9000,halt:0,screen:'P'}
-];
-const DUR=5600;
-
+const scenes=DATA.scenes,DUR=5600;
 const stage=$('stage'),copy=$('copy'),bars=$('bars'),count=$('count'),cam=$('cam'),city=$('city'),hud=$('hud'),
       playBtn=$('play'),playIcon=$('playIcon'),chapters=$('chapters'),screenTxt=$('screenTxt');
 
@@ -612,10 +700,11 @@ scenes.forEach((s,i)=>{
 });
 const fills=[...bars.querySelectorAll('i')],chBtns=[...chapters.querySelectorAll('button')];
 
-/* ---------- Camera ---------- */
-const toScreen=(c,p)=>[450+1.25*c.z*(p[0]-c.f[0]),600+1.25*c.z*(p[1]-c.f[1])];
+/* ---------- Camera: focus f (scooter coords) lands on screen point t ---------- */
+const T=c=>c.t||[450,600];
+const toScreen=(c,p)=>[T(c)[0]+1.25*c.z*(p[0]-c.f[0]),T(c)[1]+1.25*c.z*(p[1]-c.f[1])];
 function setCam(c){
-  const tx=450-c.z*(75+1.25*c.f[0]),ty=600-c.z*(300+1.25*c.f[1]);
+  const [x,y]=T(c),tx=x-c.z*(75+1.25*c.f[0]),ty=y-c.z*(300+1.25*c.f[1]);
   cam.style.transform=`translate(${tx}px,${ty}px) scale(${c.z})`;
   const cz=1+(c.z-1)*.1;
   city.style.transform=`translate(450px,752px) scale(${cz}) translate(-450px,-752px)`;
@@ -631,58 +720,79 @@ function callout(c,cm){
 /* ---------- Copy ---------- */
 function copyHTML(s){
   let h=`<p class="eyebrow">${s.eyebrow}</p>`;
-  h+=`<h2 class="stat"><span id="num">${s.num!=null?fmt(0,s.dec):s.stat}</span>${s.unit?`<span class="unit">${s.unit}</span>`:''}</h2>`;
+  if(s.quotes){
+    h+=`<figure class="quote"><blockquote id="qt"></blockquote><figcaption id="qs"></figcaption></figure>`;
+    h+=`<div class="qdots" id="qd">${s.quotes.map(()=>'<i></i>').join('')}</div>`;
+    if(s.fine)h+=`<p class="q-note">${s.fine}</p>`;
+    return h;
+  }
+  h+=`<h2 class="stat"><span id="num">${s.num!=null?fmt(0,s.dec):s.stat}</span>${s.unit?`<span class="unit">${s.unit}${s.sup?`<sup>${s.sup}</sup>`:''}</span>`:''}</h2>`;
   h+=`<p class="label">${s.label}</p>`;
   if(s.range){
-    const a=s.range.real[0]/s.range.max*100,b=s.range.real[1]/s.range.max*100;
-    h+=`<div class="range" style="--a:${a}%;--b:${b}%"><div class="range-track"><span class="range-fill"></span><span class="range-real"></span></div>`+
-       `<div class="range-scale"><span class="r-min">0</span><span class="r-real">Real ${s.range.real[0]}–${s.range.real[1]} km</span><span class="r-max">Máx. ${s.range.max} km</span></div></div>`;
+    const r=s.range;
+    h+=`<div class="range" style="--a:${r.a}%;--b:${r.b}%"><div class="range-track"><span class="range-fill"></span><span class="range-real"></span></div>`+
+       `<div class="range-scale"><span class="r-min">0</span><span class="r-real">${r.real}</span><span class="r-max">${r.max}</span></div></div>`;
   }
   if(s.specs)h+=`<dl class="specs">${s.specs.map(([v,k])=>`<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>`;
   if(s.cap)h+=`<p class="cap">${s.cap}</p>`;
+  if(s.foot)h+=`<p class="foot">${s.foot}</p>`;
   if(s.sheet)h+=`<ul class="sheet">${s.sheet.map(([i,v,k])=>`<li>${svgIcon(i)}<b>${v}</b><span>${k}</span></li>`).join('')}</ul>`;
   if(s.fine)h+=`<p class="fine">${s.fine}</p>`;
   return h;
 }
 
 /* ---------- Playback ---------- */
-let idx=0,elapsed=0,last=performance.now(),playing=true,haltTimer,numEl=null;
+let idx=0,elapsed=0,last=performance.now(),playing=true,haltTimer,swapTimer,numEl=null,qIdx=-1,first=true;
 const dur=()=>scenes[idx].d||DUR;
 
+function fillCopy(s){
+  copy.classList.remove('in','out');copy.innerHTML=copyHTML(s);void copy.offsetWidth;copy.classList.add('in');
+  numEl=s.num!=null?$('num'):null;qIdx=-1;
+  hud.innerHTML=(s.callouts||[]).map(c=>callout(c,s.cam)).join('');hud.classList.remove('out');
+}
 function render(){
   const s=scenes[idx];
-  stage.dataset.s=idx;
+  stage.dataset.s=s.id;
   clearTimeout(haltTimer);stage.classList.remove('halt');
   if(s.halt!=null)haltTimer=setTimeout(()=>stage.classList.add('halt'),reduce.matches?0:s.halt);
   count.innerHTML=`<em>${String(idx+1).padStart(2,'0')}</em> / ${String(scenes.length).padStart(2,'0')}`;
-  copy.classList.remove('in');copy.innerHTML=copyHTML(s);void copy.offsetWidth;copy.classList.add('in');
-  numEl=s.num!=null?$('num'):null;
   setCam(s.cam);
-  hud.innerHTML=(s.callouts||[]).map(c=>callout(c,s.cam)).join('');
   screenTxt.textContent=s.screen==='speed'?'0':s.screen;
+  clearTimeout(swapTimer);
+  if(first||reduce.matches){first=false;fillCopy(s)}
+  else{numEl=null;copy.classList.add('out');hud.classList.add('out');swapTimer=setTimeout(()=>fillCopy(s),230)}
   fills.forEach((f,i)=>f.style.transform=`scaleX(${i<idx?1:0})`);
-  chBtns.forEach((b,i)=>{b.toggleAttribute('aria-current',false);if(i===idx)b.setAttribute('aria-current','step');b.style.setProperty('--p',i<idx?1:0)});
-  stage.setAttribute('aria-label',`Escena ${idx+1} de ${scenes.length}: ${s.nav}. ${s.label}.`);
+  chBtns.forEach((b,i)=>{b.removeAttribute('aria-current');if(i===idx)b.setAttribute('aria-current','step');b.style.setProperty('--p',i<idx?1:0)});
+  stage.setAttribute('aria-label',`${DATA.ui.scene} ${idx+1} / ${scenes.length}: ${s.nav}.`);
 }
 function go(i){idx=(i+scenes.length)%scenes.length;elapsed=0;render()}
+function showQuote(s,i){
+  const q=s.quotes[i],qt=$('qt'),qs=$('qs'),qd=$('qd');if(!qt)return;
+  qt.textContent=q[0];qs.textContent=q[1];
+  [qt,qs].forEach(el=>{el.classList.remove('q-anim');void el.offsetWidth;el.classList.add('q-anim')});
+  [...qd.children].forEach((d,j)=>d.classList.toggle('on',j===i));
+}
 function tick(t){
   const dt=Math.min(64,t-last);last=t;
   if(playing){elapsed+=dt;if(elapsed>=dur())go(idx+1)}
-  const p=Math.min(1,elapsed/dur());
+  const p=Math.min(1,elapsed/dur()),s=scenes[idx];
   fills[idx].style.transform=`scaleX(${p})`;
   chBtns[idx].style.setProperty('--p',p);
-  const s=scenes[idx];
   if(numEl){
-    const q=reduce.matches?1:Math.min(1,Math.max(0,(elapsed-250)/1400)),e=1-Math.pow(1-q,3),v=s.num*e;
+    const q=reduce.matches?1:Math.min(1,Math.max(0,(elapsed-450)/1400)),e=1-Math.pow(1-q,3),v=s.num*e;
     numEl.textContent=fmt(v,s.dec);
-    if(s.screen==='speed')screenTxt.textContent=Math.round(v);
+    if(s.screen==='speed')screenTxt.textContent=Math.round(v*(s.screenScale||1));
+  }
+  if(s.quotes&&$('qt')){
+    const qi=Math.min(s.quotes.length-1,Math.floor(Math.max(0,elapsed-300)/((dur()-300)/s.quotes.length)));
+    if(qi!==qIdx){qIdx=qi;showQuote(s,qi)}
   }
   requestAnimationFrame(tick);
 }
 function setPlaying(p){
   playing=p;stage.classList.toggle('paused',!p);
   playIcon.innerHTML=p?'<path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/>':'<path d="M7.5 4.5v15l12-7.5z"/>';
-  playBtn.setAttribute('aria-label',p?'Pausar':'Reproducir');playBtn.title=p?'Pausar':'Reproducir';
+  const l=p?DATA.ui.pause:DATA.ui.play;playBtn.setAttribute('aria-label',l);playBtn.title=l;
 }
 
 /* ---------- Input: tap sides / hold / swipe ---------- */
@@ -720,7 +830,7 @@ fsBtn.onclick=toggleFs;
 
 document.addEventListener('keydown',e=>{
   if(e.target.closest('input,textarea,select')||e.metaKey||e.ctrlKey||e.altKey)return;
-  const onBtn=e.target.closest('button');
+  const onBtn=e.target.closest('button,a,summary');
   if(e.key==='ArrowRight'){e.preventDefault();go(idx+1)}
   else if(e.key==='ArrowLeft'){e.preventDefault();go(idx-1)}
   else if((e.key===' '||e.key==='k')&&!onBtn){e.preventDefault();setPlaying(!playing)}
@@ -735,6 +845,8 @@ document.addEventListener('visibilitychange',()=>{
   else if(!document.hidden&&autoPaused){autoPaused=false;setPlaying(true)}
 });
 
+const start=+(new URLSearchParams(location.search).get('scene'))||0;
+idx=Math.min(scenes.length-1,Math.max(0,start));
 render();requestAnimationFrame(tick);
 })();
 </script>
